@@ -1,0 +1,672 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <title>ENTRENAPP PRO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+
+
+    <style>
+        :root {
+            --bg: #f3f4f6;
+            --card: #ffffff;
+            --primary: #2563eb;
+            --dark: #1e293b;
+            --text: #1f2937;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --green: #16a34a;
+            --orange: #f97316;
+            --red: #dc2626;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            margin: 0;
+            padding: 12px;
+            background: var(--bg);
+            color: var(--text);
+            padding-top: 130px;
+            padding-bottom: 240px;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--dark);
+            color: white;
+            padding: 10px 15px;
+            z-index: 1000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #60a5fa;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        select {
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 13px;
+        }
+
+        select option {
+            color: black;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .exercise-title {
+            font-size: 19px;
+            font-weight: 700;
+        }
+
+        .exercise-meta {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 5px 0 10px 0;
+            line-height: 1.4;
+        }
+
+        .target-goal {
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-top: 2px;
+        }
+
+        details {
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        summary {
+            padding: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .tech-list {
+            margin: 0;
+            padding: 10px 10px 10px 25px;
+            font-size: 13px;
+            color: #374151;
+            list-style-type: square;
+        }
+
+        .notes-area {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            margin-top: 5px;
+        }
+
+        .series-row {
+            display: grid;
+            grid-template-columns: 40px 1fr 1fr 70px;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            height: 44px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        input.pending {
+            border: 2px solid var(--red);
+            color: var(--red);
+            background: #fff5f5;
+        }
+
+        .vol-display {
+            font-weight: 700;
+            text-align: right;
+            color: var(--primary);
+            font-size: 14px;
+        }
+
+        .exercise-total-box {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            font-size: 15px;
+        }
+
+        .diff-row {
+            font-size: 13px;
+            margin-top: 6px;
+            font-weight: 700;
+        }
+
+        .bottom-actions {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e2e8f0;
+            border-radius: 12px;
+        }
+
+        .data-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn-action {
+            font-size: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-action.export {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-action.import {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .day-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+
+        #dayTotal {
+            font-size: 22px;
+            font-weight: 800;
+            display: block;
+        }
+
+        #dayDiff {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 2px;
+            display: block;
+        }
+
+        .green {
+            color: #16a34a !important;
+        }
+
+        .orange {
+            color: #f97316 !important;
+        }
+
+        .red {
+            color: #dc2626 !important;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loader" class="card">
+        <h3>🚀 ENTRENAPP: Cargar CSV</h3>
+        <input type="file" id="csvInput" accept=".csv">
+    </div>
+
+    <div id="app" class="hidden">
+        <header>
+            <div class="header-top">
+                <h1>ENTRENAPP</h1>
+                <button class="btn-reset" onclick="resetRoutine()">🔄 NUEVA RUTINA</button>
+            </div>
+            <div class="controls">
+                <select id="week"></select>
+                <select id="day"></select>
+                <div style="margin-top:6px;">
+                    Estado del día:
+                    <select id="coachDayState">
+                        <option value="normal">Normal</option>
+                        <option value="bajo">Bajo energía</option>
+                        <option value="molestias">Molestias</option>
+                    </select>
+                </div>
+
+            </div>
+        </header>
+
+        <div id="workout"></div>
+
+        <div class="bottom-actions">
+            <h4 style="margin:0 0 10px 0; font-size:12px; text-align:center; color: var(--dark);">GESTIÓN DE DATOS</h4>
+            <div class="data-actions">
+                <button class="btn-action export" onclick="exportData('day')">📤 Exp. Día</button>
+                <button class="btn-action export" onclick="exportData('week')">📤 Exp. Semana</button>
+                <button class="btn-action import" onclick="triggerImport('day')">📥 Imp. Día</button>
+                <button class="btn-action import" onclick="triggerImport('week')">📥 Imp. Semana</button>
+            </div>
+            <input type="file" id="importFile" class="hidden" accept=".csv">
+        </div>
+
+        <div class="day-footer">
+            VOLUMEN TOTAL DEL DÍA
+            <span id="dayTotal">0 kg</span>
+            <span id="dayDiff">---</span>
+        </div>
+    </div>
+    <script src="coach.js"></script>
+
+    <script>
+        const RK = "routine", PK = "progress", NK = "notes";
+        const csvInput = document.getElementById("csvInput"), loader = document.getElementById("loader"), app = document.getElementById("app");
+        const weekSel = document.getElementById("week"), daySel = document.getElementById("day"), workout = document.getElementById("workout"), dayTotal = document.getElementById("dayTotal"), dayDiff = document.getElementById("dayDiff");
+        const importFileInput = document.getElementById("importFile");
+
+        const loadRoutine = () => JSON.parse(localStorage.getItem(RK) || "null");
+        const loadProgress = () => JSON.parse(localStorage.getItem(PK) || "{}");
+        const saveProgress = (p) => localStorage.setItem(PK, JSON.stringify(p));
+        const loadNotes = () => JSON.parse(localStorage.getItem(NK) || "{}");
+        const saveNotes = (n) => localStorage.setItem(NK, JSON.stringify(n));
+        const coachDaySel = document.getElementById("coachDayState");
+
+
+        csvInput.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            Papa.parse(file, {
+                header: true, skipEmptyLines: true,
+                complete: (res) => {
+                    localStorage.setItem(RK, JSON.stringify({ rows: res.data }));
+                    location.reload();
+                }
+            });
+        };
+
+        function resetRoutine() {
+            if (confirm("¿Quieres borrar la rutina actual y cargar una nueva?")) {
+                localStorage.removeItem(RK);
+                location.reload();
+            }
+        }
+
+        function exportData(type) {
+            const p = loadProgress();
+            const w = weekSel.value;
+            const d = daySel.value;
+            const rows = [];
+            Object.keys(p).forEach(key => {
+                const parts = key.split('|');
+                if (parts.length < 4) return;
+                const [kW, kD, kEx, kS] = parts;
+                if (type === 'day' && (kW !== w || kD !== d)) return;
+                if (type === 'week' && kW !== w) return;
+                rows.push({ semana: kW, dia: kD, ejercicio: kEx, serie: Number(kS) + 1, peso: p[key].w, reps: p[key].r });
+            });
+            if (rows.length === 0) { alert("No hay datos."); return; }
+            const csv = Papa.unparse(rows);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `marcas_${type}_S${w}.csv`;
+            link.click();
+        }
+
+        let currentImportType = '';
+        function triggerImport(type) {
+            currentImportType = type;
+            importFileInput.value = '';
+            importFileInput.click();
+        }
+
+        importFileInput.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+            Papa.parse(file, {
+                header: true, skipEmptyLines: true,
+                complete: (results) => {
+                    const p = loadProgress();
+                    const currentW = weekSel.value;
+                    const currentD = daySel.value;
+                    results.data.forEach(row => {
+                        const sem = row.semana || row.kW;
+                        const dia = row.dia || row.kD;
+                        const ex = row.ejercicio || row.kEx;
+                        const ser = row.serie || row.kS;
+                        if (!sem || !ex) return;
+                        if (currentImportType === 'day' && (String(sem) !== String(currentW) || String(dia) !== String(currentD))) return;
+                        if (currentImportType === 'week' && String(sem) !== String(currentW)) return;
+                        const key = `${sem}|${dia}|${ex}|${Number(ser) - 1}`;
+                        p[key] = { w: row.peso || row.w || "", r: row.reps || row.r || "" };
+                    });
+                    saveProgress(p);
+                    location.reload();
+                }
+            });
+        };
+
+        function setupSelectors(r) {
+            weekSel.innerHTML = Array.from({ length: 12 }, (_, i) =>
+                `<option value="${i + 1}">Semana ${i + 1}</option>`
+            ).join("");
+
+            const days = [...new Set(r.rows.map(x => x.day))];
+            daySel.innerHTML = days
+                .map(d => `<option value="${d}">Día ${d}</option>`)
+                .join("");
+
+            weekSel.onchange = () => {
+                render();
+                coachDaySel.value = loadDayState(weekSel.value, daySel.value);
+            };
+
+            daySel.onchange = () => {
+                render();
+                coachDaySel.value = loadDayState(weekSel.value, daySel.value);
+            };
+        }
+
+        function render() {
+            const r = loadRoutine(); if (!r) return;
+            const p = loadProgress();
+            const n = loadNotes();
+            const w = Number(weekSel.value);
+            const d = daySel.value;
+            const prevW = w > 1 ? w - 1 : null;
+            workout.innerHTML = "";
+
+            let totalDayPrev = 0;
+
+            r.rows.filter(x => x.day === d).sort((a, b) => a.order - b.order).forEach(ex => {
+                const card = document.createElement("div");
+                card.className = "card";
+
+                const noteKey = `${w}|${d}|${ex.exercise_name}`;
+                const currentNote = n[noteKey] || "";
+
+                let prevExVol = 0;
+                if (prevW) {
+                    for (let s = 0; s < Number(ex.sets); s++) {
+                        const pk = `${prevW}|${d}|${ex.exercise_name}|${s}`;
+                        const prevData = p[pk];
+                        if (prevData) prevExVol += (Number(prevData.w) || 0) * (Number(prevData.r) || 0);
+                    }
+                }
+                card.dataset.prevVol = prevExVol;
+                totalDayPrev += prevExVol;
+
+                let html = `
+      <div class="exercise-title">${ex.exercise_name}</div>
+      <div class="exercise-meta">
+        ${ex.primary_muscle} • ${ex.rest_seconds}s descanso
+        <span class="target-goal">Objetivo: ${ex.sets} series x ${ex.reps} reps</span>
+      </div>
+
+      <details>
+        <summary>⚙️ Técnica</summary>
+        <ul class="tech-list">
+          <li><strong>Inicio:</strong> ${ex.tech_start_position || "-"}</li>
+          <li><strong>Sentir:</strong> ${ex.tech_feel || "-"}</li>
+          <li><strong>Evitar:</strong> ${ex.tech_avoid || "-"}</li>
+          <li><strong>Tip:</strong> ${ex.coach_tip || "-"}</li>
+        </ul>
+      </details>
+
+      <details>
+        <summary>📝 Notas/Observaciones</summary>
+        <div style="padding: 10px;">
+          <textarea class="notes-area" data-nk="${noteKey}" placeholder="Ej: Me costó la última serie...">${currentNote}</textarea>
+        </div>
+      </details>
+    `;
+
+                for (let s = 0; s < Number(ex.sets); s++) {
+                    const k = `${w}|${d}|${ex.exercise_name}|${s}`;
+                    const pk = prevW ? `${prevW}|${d}|${ex.exercise_name}|${s}` : null;
+                    const cur = p[k] || { w: "", r: "" };
+                    const prev = pk ? p[pk] : null;
+
+                    const isPending = (cur.w === "" && cur.r === "" && prev);
+                    const valW = cur.w !== "" ? cur.w : (prev?.w || "");
+                    const valR = cur.r !== "" ? cur.r : (prev?.r || "");
+                    const vol = (Number(valW) || 0) * (Number(valR) || 0);
+
+                    html += `
+        <div class="series-row" data-k="${k}">
+          <span>S${s + 1}</span>
+          <input type="number" class="in-w ${isPending ? 'pending' : ''}" value="${valW}" placeholder="kg">
+          <input type="number" class="in-r ${isPending ? 'pending' : ''}" value="${valR}" placeholder="reps">
+          <div class="vol-display">${vol}</div>
+        </div>
+      `;
+                }
+
+                html += `
+      <div class="exercise-total-box">
+        <div class="total-row"><span>VOLUMEN:</span><span><span class="ex-vol-val">0</span> kg</span></div>
+        <div class="diff-row"></div>
+      </div>
+    `;
+                card.innerHTML = html;
+                workout.appendChild(card);
+
+                // Guardado de notas
+                card.querySelector('.notes-area').oninput = (e) => {
+                    const notes = loadNotes();
+                    notes[e.target.dataset.nk] = e.target.value;
+                    saveNotes(notes);
+                };
+
+                // Lógica de cálculo al escribir
+                const inputs = card.querySelectorAll('input[type="number"]');
+                inputs.forEach(input => {
+                    input.oninput = () => {
+                        input.classList.remove('pending');
+                        const row = input.closest('.series-row');
+                        const wVal = row.querySelector('.in-w').value;
+                        const rVal = row.querySelector('.in-r').value;
+
+                        // Actualizar UI de la serie
+                        row.querySelector('.vol-display').textContent = (Number(wVal) || 0) * (Number(rVal) || 0);
+
+                        // Guardar progreso
+                        const prog = loadProgress();
+                        prog[row.dataset.k] = { w: wVal, r: rVal };
+                        saveProgress(prog);
+
+                        // Disparar cálculos globales
+                        runAllCalculations();
+                    };
+                });
+            });
+
+            document.body.dataset.totalDayPrev = totalDayPrev;
+            runAllCalculations();
+        }
+
+        function runAllCalculations() {
+            let grandTotal = 0;
+
+            document.querySelectorAll('.card').forEach(card => {
+                let exerciseTotal = 0;
+                card.querySelectorAll('.vol-display').forEach(v => {
+                    exerciseTotal += Number(v.textContent) || 0;
+                });
+
+                // CORRECCIÓN AQUÍ: Se asegura de encontrar el span de volumen del ejercicio
+                const displayEx = card.querySelector('.ex-vol-val');
+                if (displayEx) displayEx.textContent = exerciseTotal;
+
+                grandTotal += exerciseTotal;
+
+                const prevVol = Number(card.dataset.prevVol) || 0;
+                const diffRow = card.querySelector('.diff-row');
+                let coachBox = card.querySelector('.coach-box');
+                if (!coachBox) {
+                    coachBox = document.createElement("div");
+                    coachBox.className = "coach-box";
+                    card.appendChild(coachBox);
+                }
+
+                // reps realizadas
+                const repsPerformed = [];
+                card.querySelectorAll('.series-row').forEach(row => {
+                    const r = Number(row.querySelector('.in-r')?.value);
+                    if (!isNaN(r) && r > 0) repsPerformed.push(r);
+                });
+
+                // reps objetivo (seguro)
+                let targetReps = null;
+                const goalEl = card.querySelector('.target-goal');
+                if (goalEl) {
+                    const match = goalEl.textContent.match(/x (\d+)/);
+                    if (match) targetReps = Number(match[1]);
+                }
+
+                // mensaje del coach
+                coachBox.textContent = Coach.analyzeExercise({
+                    currentVolume: exerciseTotal,
+                    previousVolume: prevVol,
+                    performedReps: repsPerformed,
+                    targetReps: targetReps,
+                    dayState: loadDayState(weekSel.value, daySel.value)
+                });
+
+                const isWeek1 = Number(weekSel.value) === 1;
+
+                if (!isWeek1 && prevVol > 0 && diffRow) {
+                    const pct = (((exerciseTotal - prevVol) / prevVol) * 100).toFixed(1);
+                    let color = pct > 0 ? "green" : (pct < 0 ? "red" : "orange");
+                    let icon = pct > 0 ? "▲ +" : (pct < 0 ? "▼ " : "• ");
+                    diffRow.className = `diff-row ${color}`;
+                    diffRow.textContent = `${icon}${pct}% vs semana anterior`;
+                } else if (diffRow) {
+                    diffRow.textContent = isWeek1 ? "Semana 1: Fase Inicial" : "Sin datos previos";
+                    diffRow.className = "diff-row";
+                }
+            });
+
+            // Actualizar volumen del día
+            dayTotal.textContent = `${grandTotal} kg`;
+
+            const prevDayTotal = Number(document.body.dataset.totalDayPrev) || 0;
+            if (Number(weekSel.value) > 1 && prevDayTotal > 0) {
+                const dayPct = (((grandTotal - prevDayTotal) / prevDayTotal) * 100).toFixed(1);
+                dayDiff.className = dayPct > 0 ? "green" : (dayPct < 0 ? "red" : "orange");
+                dayDiff.textContent = `Progreso Diario: ${dayPct > 0 ? '+' : ''}${dayPct}% vs semana anterior`;
+            } else {
+                dayDiff.textContent = "---";
+                dayDiff.className = "";
+            }
+        }
+        const DAY_STATE_KEY = "coach_day_state";
+
+        function loadDayState(week, day) {
+            const d = JSON.parse(localStorage.getItem(DAY_STATE_KEY) || "{}");
+            return d[`${week}|${day}`] || "normal";
+        }
+
+        function saveDayState(week, day, value) {
+            const d = JSON.parse(localStorage.getItem(DAY_STATE_KEY) || "{}");
+            d[`${week}|${day}`] = value;
+            localStorage.setItem(DAY_STATE_KEY, JSON.stringify(d));
+        }
+
+        function init() {
+            const r = loadRoutine();
+            if (!r) return;
+            loader.classList.add("hidden");
+            app.classList.remove("hidden");
+            setupSelectors(r);
+            coachDaySel.value = loadDayState(weekSel.value, daySel.value);
+
+            coachDaySel.onchange = () => {
+                saveDayState(weekSel.value, daySel.value, coachDaySel.value);
+                runAllCalculations(); // 👈 CLAVE
+            };
+
+
+            render();
+        }
+        init();
+    </script>
+</body>
+
+</html>
