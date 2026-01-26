@@ -6,6 +6,7 @@
     <title>ENTRENAPP PRO</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e293b">
 
@@ -282,6 +283,84 @@
         .hidden {
             display: none;
         }
+
+        /* HEADER NUEVO */
+
+        header {
+            padding: 10px 14px 12px;
+        }
+
+        .header-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .header-main {
+            justify-content: space-between;
+        }
+
+        .header-main h1 {
+            font-size: 16px;
+        }
+
+        .header-selects select {
+            flex: 1;
+        }
+
+        .header-meta {
+            justify-content: space-between;
+        }
+
+        .header-meta select {
+            font-size: 12px;
+            padding: 6px;
+        }
+
+        .day-skip {
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* TABS */
+        .header-tabs {
+            justify-content: center;
+            margin-top: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            text-transform: uppercase;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+        }
+
+        #chartsView select {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #cbd5f5;
+        }
+
+        #chartExerciseSelect {
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -294,43 +373,75 @@
 
     <div id="app" class="hidden">
         <header>
-            <div class="header-top">
-                <h1>ENTRENAPP</h1>
-                <button class="btn-reset" onclick="resetRoutine()">🔄 NUEVA RUTINA</button>
-            </div>
-            <div class="controls">
-                <select id="week"></select>
-                <select id="day"></select>
-                <div style="margin-top:6px;">
-                    Estado del día:
+            <header>
+                <!-- FILA 1 -->
+                <div class="header-row header-main">
+                    <h1>ENTRENAPP</h1>
+                    <button class="btn-reset" onclick="resetRoutine()">🔄 Nueva rutina</button>
+                </div>
+
+                <!-- FILA 2 -->
+                <div class="header-row header-selects">
+                    <select id="week"></select>
+                    <select id="day"></select>
+                </div>
+
+                <!-- FILA 3 -->
+                <div class="header-row header-meta">
+                    <label class="day-skip">
+                        <input type="checkbox" id="dayNotTrained">
+                        Día no entrenado
+                    </label>
+
                     <select id="coachDayState">
-                        <option value="normal">Normal</option>
-                        <option value="bajo">Bajo energía</option>
-                        <option value="molestias">Molestias</option>
+                        <option value="normal">Estado: Normal</option>
+                        <option value="bajo">Estado: Bajo energía</option>
+                        <option value="molestias">Estado: Molestias</option>
                     </select>
                 </div>
 
-            </div>
+                <!-- FILA 4 -->
+                <div class="header-row header-tabs">
+                    <button class="tab-btn active" id="tabWorkout">Entrenamiento</button>
+                    <button class="tab-btn" id="tabCharts">Gráficos</button>
+                </div>
+            </header>
+
         </header>
 
         <div id="workout"></div>
+        <div id="chartsView" class="hidden">
+            <div class="card">
+                <h3>📈 Progresión por ejercicio</h3>
 
-        <div class="bottom-actions">
-            <h4 style="margin:0 0 10px 0; font-size:12px; text-align:center; color: var(--dark);">GESTIÓN DE DATOS</h4>
-            <div class="data-actions">
-                <button class="btn-action export" onclick="exportData('day')">📤 Exp. Día</button>
-                <button class="btn-action export" onclick="exportData('week')">📤 Exp. Semana</button>
-                <button class="btn-action import" onclick="triggerImport('day')">📥 Imp. Día</button>
-                <button class="btn-action import" onclick="triggerImport('week')">📥 Imp. Semana</button>
+                <label style="font-size:13px; font-weight:600; display:block; margin-bottom:6px;">
+                    Ejercicio
+                </label>
+
+                <select id="chartExerciseSelect" style="width:100%; margin-bottom:16px;"></select>
+
+                <canvas id="exerciseVolumeChart"></canvas>
             </div>
-            <input type="file" id="importFile" class="hidden" accept=".csv">
         </div>
+    </div>
 
-        <div class="day-footer">
-            VOLUMEN TOTAL DEL DÍA
-            <span id="dayTotal">0 kg</span>
-            <span id="dayDiff">---</span>
+
+    <div class="bottom-actions">
+        <h4 style="margin:0 0 10px 0; font-size:12px; text-align:center; color: var(--dark);">GESTIÓN DE DATOS</h4>
+        <div class="data-actions">
+            <button class="btn-action export" onclick="exportData('day')">📤 Exp. Día</button>
+            <button class="btn-action export" onclick="exportData('week')">📤 Exp. Semana</button>
+            <button class="btn-action import" onclick="triggerImport('day')">📥 Imp. Día</button>
+            <button class="btn-action import" onclick="triggerImport('week')">📥 Imp. Semana</button>
         </div>
+        <input type="file" id="importFile" class="hidden" accept=".csv">
+    </div>
+
+    <div class="day-footer">
+        VOLUMEN TOTAL DEL DÍA
+        <span id="dayTotal">0 kg</span>
+        <span id="dayDiff">---</span>
+    </div>
     </div>
     <script src="coach.js"></script>
 
@@ -339,13 +450,58 @@
         const csvInput = document.getElementById("csvInput"), loader = document.getElementById("loader"), app = document.getElementById("app");
         const weekSel = document.getElementById("week"), daySel = document.getElementById("day"), workout = document.getElementById("workout"), dayTotal = document.getElementById("dayTotal"), dayDiff = document.getElementById("dayDiff");
         const importFileInput = document.getElementById("importFile");
+        const dayNotTrainedCheckbox = document.getElementById("dayNotTrained");
 
         const loadRoutine = () => JSON.parse(localStorage.getItem(RK) || "null");
         const loadProgress = () => JSON.parse(localStorage.getItem(PK) || "{}");
         const saveProgress = (p) => localStorage.setItem(PK, JSON.stringify(p));
         const loadNotes = () => JSON.parse(localStorage.getItem(NK) || "{}");
         const saveNotes = (n) => localStorage.setItem(NK, JSON.stringify(n));
+        const DAY_NOT_TRAINED_KEY = "day_not_trained";
+
+        const loadDayNotTrained = (week, day) => {
+            const d = JSON.parse(localStorage.getItem(DAY_NOT_TRAINED_KEY) || "{}");
+            return d[`${week}|${day}`] === true;
+        };
+
+        const saveDayNotTrained = (week, day, value) => {
+            const d = JSON.parse(localStorage.getItem(DAY_NOT_TRAINED_KEY) || "{}");
+            const key = `${week}|${day}`;
+            if (value) d[key] = true;
+            else delete d[key];
+            localStorage.setItem(DAY_NOT_TRAINED_KEY, JSON.stringify(d));
+        };
+
+        const SKIP_EX_KEY = "skipped_exercises";
+
+        const loadSkippedExercises = () =>
+            JSON.parse(localStorage.getItem(SKIP_EX_KEY) || "{}");
+
+        const saveSkippedExercises = (d) =>
+            localStorage.setItem(SKIP_EX_KEY, JSON.stringify(d));
+
+        const isExerciseSkipped = (week, day, exName) => {
+            const d = loadSkippedExercises();
+            return d[`${week}|${day}|${exName}`] === true;
+        };
+
+        const setExerciseSkipped = (week, day, exName, value) => {
+            const d = loadSkippedExercises();
+            const key = `${week}|${day}|${exName}`;
+            if (value) d[key] = true;
+            else delete d[key];
+            saveSkippedExercises(d);
+        };
+
         const coachDaySel = document.getElementById("coachDayState");
+
+        const chartsView = document.getElementById("chartsView");
+        const tabWorkout = document.getElementById("tabWorkout");
+        const tabCharts = document.getElementById("tabCharts");
+        const chartExerciseSelect = document.getElementById("chartExerciseSelect");
+        const exerciseChartCanvas = document.getElementById("exerciseVolumeChart");
+
+        let exerciseChart = null;
 
 
         csvInput.onchange = e => {
@@ -371,6 +527,21 @@
             const p = loadProgress();
             const w = weekSel.value;
             const d = daySel.value;
+            const dayNotTrained = loadDayNotTrained(w, d);
+
+            if (dayNotTrained) {
+                workout.innerHTML = `
+        <div class="card" style="text-align:center;">
+            <h3>🚫 Día no entrenado</h3>
+            <p>Este día fue marcado como no entrenado.<br>
+            No se calculan volúmenes ni progreso.</p>
+        </div>
+    `;
+                dayTotal.textContent = "0 kg";
+                dayDiff.textContent = "---";
+                return; // ⛔ MUY IMPORTANTE
+            }
+
             const rows = [];
             Object.keys(p).forEach(key => {
                 const parts = key.split('|');
@@ -432,14 +603,137 @@
                 .map(d => `<option value="${d}">Día ${d}</option>`)
                 .join("");
 
+            const originalRender = render;
+
             weekSel.onchange = () => {
-                render();
+                originalRender();
                 coachDaySel.value = loadDayState(weekSel.value, daySel.value);
+                dayNotTrainedCheckbox.checked =
+                    loadDayNotTrained(weekSel.value, daySel.value);
             };
 
             daySel.onchange = () => {
-                render();
+                originalRender();
                 coachDaySel.value = loadDayState(weekSel.value, daySel.value);
+                dayNotTrainedCheckbox.checked =
+                    loadDayNotTrained(weekSel.value, daySel.value);
+            };
+        }
+        function findLastTrainedWeek(currentWeek, day) {
+            let w = currentWeek - 1;
+            while (w >= 1) {
+                if (!loadDayNotTrained(w, day)) {
+                    return w;
+                }
+                w--;
+            }
+            return null;
+        }
+
+        function getExerciseVolumeByWeek(exerciseName, day) {
+            const result = [];
+            const TOTAL_WEEKS = 12; // 👈 coherente con tu selector
+
+            for (let w = 1; w <= TOTAL_WEEKS; w++) {
+
+                // 1️⃣ Día no entrenado
+                if (loadDayNotTrained(w, day)) {
+                    result.push({ week: w, volume: null });
+                    continue;
+                }
+
+                // 2️⃣ Ejercicio omitido
+                if (isExerciseSkipped(w, day, exerciseName)) {
+                    result.push({ week: w, volume: null });
+                    continue;
+                }
+
+                // 3️⃣ Calcular volumen
+                let volume = 0;
+                const p = loadProgress();
+
+                Object.keys(p).forEach(key => {
+                    const [kW, kD, kEx] = key.split('|');
+
+                    if (
+                        Number(kW) === w &&
+                        kD === day &&
+                        kEx === exerciseName
+                    ) {
+                        const { w: weight, r: reps } = p[key];
+                        volume += (Number(weight) || 0) * (Number(reps) || 0);
+                    }
+                });
+
+                result.push({
+                    week: w,
+                    volume: volume > 0 ? volume : null
+                });
+            }
+
+            return result;
+        }
+
+        function drawExerciseChart(exerciseName) {
+            console.log("Dibujando gráfico para:", exerciseName);
+
+            const data = getExerciseVolumeByWeek(exerciseName, daySel.value);
+            console.log("Datos del gráfico:", data);
+
+            if (!data.length) return;
+
+            const labels = data.map(d => `Semana ${d.week}`);
+            const volumes = data.map(d => d.volume);
+
+            if (exerciseChart) {
+                exerciseChart.destroy();
+            }
+
+            const ctx = document
+                .getElementById("exerciseVolumeChart")
+                .getContext("2d");
+
+            exerciseChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: "Volumen",
+                        data: volumes,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        }
+
+
+
+        function populateExerciseChartSelector() {
+            const r = loadRoutine();
+            if (!r) return;
+
+            const exercises = [...new Set(r.rows.map(x => x.exercise_name))];
+
+            chartExerciseSelect.innerHTML = exercises
+                .map(ex => `<option value="${ex}">${ex}</option>`)
+                .join("");
+
+            drawExerciseChart(exercises[0]);
+
+            chartExerciseSelect.onchange = () => {
+                drawExerciseChart(chartExerciseSelect.value);
             };
         }
 
@@ -449,8 +743,24 @@
             const n = loadNotes();
             const w = Number(weekSel.value);
             const d = daySel.value;
-            const prevW = w > 1 ? w - 1 : null;
+            const prevW = findLastTrainedWeek(w, d);
             workout.innerHTML = "";
+            const dayNotTrained = loadDayNotTrained(w, d);
+
+            if (dayNotTrained) {
+                workout.innerHTML = `
+        <div class="card" style="text-align:center;">
+            <h3>🚫 Día no entrenado</h3>
+            <p>Este día fue marcado como no entrenado.<br>
+            No se registran ejercicios ni progreso.</p>
+        </div>
+    `;
+
+                dayTotal.textContent = "0 kg";
+                dayDiff.textContent = "---";
+                return; // ⛔ corta render COMPLETAMENTE
+            }
+
 
             let totalDayPrev = 0;
 
@@ -472,8 +782,17 @@
                 card.dataset.prevVol = prevExVol;
                 totalDayPrev += prevExVol;
 
+                const skipped = isExerciseSkipped(w, d, ex.exercise_name);
+
                 let html = `
-      <div class="exercise-title">${ex.exercise_name}</div>
+  <div class="exercise-title">
+    ${ex.exercise_name}
+    <label style="float:right; font-size:12px;">
+      <input type="checkbox" class="skip-ex" ${skipped ? "checked" : ""}>
+      Ejercicio omitido
+    </label>
+  </div>
+
       <div class="exercise-meta">
         ${ex.primary_muscle} • ${ex.rest_seconds}s descanso
         <span class="target-goal">Objetivo: ${ex.sets} series x ${ex.reps} reps</span>
@@ -519,13 +838,32 @@
                 }
 
                 html += `
-      <div class="exercise-total-box">
-        <div class="total-row"><span>VOLUMEN:</span><span><span class="ex-vol-val">0</span> kg</span></div>
-        <div class="diff-row"></div>
-      </div>
-    `;
+  <div class="exercise-total-box">
+    <div class="total-row">
+      <span>VOLUMEN:</span>
+      <span><span class="ex-vol-val">0</span> kg</span>
+    </div>
+    <div class="diff-row"></div>
+  </div>
+`;
+
                 card.innerHTML = html;
                 workout.appendChild(card);
+
+                const skipCheckbox = card.querySelector('.skip-ex');
+
+                skipCheckbox.onchange = () => {
+                    setExerciseSkipped(w, d, ex.exercise_name, skipCheckbox.checked);
+                    render();
+                };
+
+                if (skipCheckbox.checked) {
+                    card.style.opacity = "0.5";
+                    card.querySelectorAll('input[type="number"]').forEach(i => {
+                        i.disabled = true;
+                    });
+                }
+
 
                 // Guardado de notas
                 card.querySelector('.notes-area').oninput = (e) => {
@@ -562,9 +900,23 @@
         }
 
         function runAllCalculations() {
+            if (loadDayNotTrained(weekSel.value, daySel.value)) {
+                dayTotal.textContent = "0 kg";
+                dayDiff.textContent = "---";
+                return;
+            }
+
             let grandTotal = 0;
 
             document.querySelectorAll('.card').forEach(card => {
+                if (card.querySelector('.skip-ex')?.checked) {
+                    const coachBox = card.querySelector('.coach-box');
+                    if (coachBox) {
+                        coachBox.textContent = "Ejercicio omitido. No se analiza progreso.";
+                    }
+                    return;
+                }
+
                 let exerciseTotal = 0;
                 card.querySelectorAll('.vol-display').forEach(v => {
                     exerciseTotal += Number(v.textContent) || 0;
@@ -660,6 +1012,28 @@
             coachDaySel.onchange = () => {
                 saveDayState(weekSel.value, daySel.value, coachDaySel.value);
                 runAllCalculations(); // 👈 CLAVE
+            };
+            dayNotTrainedCheckbox.onchange = () => {
+                saveDayNotTrained(
+                    weekSel.value,
+                    daySel.value,
+                    dayNotTrainedCheckbox.checked
+                );
+                render(); // 🔥 vuelve a dibujar todo el día
+            };
+            tabWorkout.onclick = () => {
+                chartsView.classList.add("hidden");
+                workout.classList.remove("hidden");
+                tabWorkout.classList.add("active");
+                tabCharts.classList.remove("active");
+            };
+
+            tabCharts.onclick = () => {
+                workout.classList.add("hidden");
+                chartsView.classList.remove("hidden");
+                tabCharts.classList.add("active");
+                tabWorkout.classList.remove("active");
+                populateExerciseChartSelector();
             };
 
 
